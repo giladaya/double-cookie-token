@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+  </head>
+  <body>
+    <div id="root">
+      <form action="/login" method="GET">
+        <label>
+          email
+          <input name="email"/>
+        </label>
+        <label>
+          password
+          <input name="password" type="password"/>
+        </label>
+        <button>Login</button>
+      </form>
+      <br/>
+      <div>
+        <button id="btn_logout">Logout</button>
+      </div>
+      <br/>
+      <div id="result">
+
+      </div>
+    </div>
+    <script>
+      const COOKIE_NAME = 'token_header_payload';
+      const cookies = document.cookie
+        .split(';')
+        .reduce((res, c) => {
+          const [key, val] = c.trim().split('=').map(decodeURIComponent)
+          try {
+            return Object.assign(res, { [key]: JSON.parse(val) })
+          } catch (e) {
+            return Object.assign(res, { [key]: val })
+          }
+        }, {});
+      console.log('Cookies', cookies);
+      
+      const resEl = document.getElementById('result');
+      const btnLogout = document.getElementById('btn_logout');
+      btnLogout.addEventListener('click', ev => {
+        ev.preventDefault();
+        // remove cookie
+        document.cookie = COOKIE_NAME + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/;';
+        location.reload();
+      })
+
+      if (cookies[COOKIE_NAME]) {
+        fetch('/private', {
+          headers: {
+            'x-requested-with': cookies[COOKIE_NAME],
+          }
+        })
+        .then(res => res.text())
+        .then(text => {
+          resEl.innerText = text;
+        })
+      } else {
+        resEl.innerText = 'Not logged-in';
+      }
+    </script>
+  </body>
+</html>
