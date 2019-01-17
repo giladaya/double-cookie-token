@@ -4,6 +4,7 @@
 const path = require('path')
 const jwt = require('jsonwebtoken')
 const express = require('express')
+const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 
 const PORT = 3210
@@ -25,8 +26,6 @@ function checkAuth(req, res, next) {
     token = `${cookie1}.${cookie2}`
     isWeb = true
   }
-  console.log('isWeb', isWeb)
-  console.log('token', token)
   
   try {
     const decoded = jwt.verify(token, SECRET)
@@ -73,6 +72,9 @@ function setDoubleCookie(res, token) {
 
 const app = express()
 app.use(cookieParser())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+
 app.use('/www', express.static(path.join(__dirname, 'public')))
 
 app.get('/', (req, res) => {
@@ -80,9 +82,9 @@ app.get('/', (req, res) => {
 })
 
 // http://localhost:3210/login?email=foo@bar.com&password=123456
-app.get('/login', (req, res) => {
-  const email = req.query.email
-  const password = req.query.password
+app.post('/login', (req, res) => {
+  const email = req.body.email
+  const password = req.body.password
   if (!email || !password) {
     res.status = 400
     res.send('Missing email or password')
@@ -103,6 +105,7 @@ app.get('/login', (req, res) => {
   // res.send('Ok')
 })
 
+// Should be POST, used GET for simplifying the client
 // https://gist.github.com/ziluvatar/a3feb505c4c0ec37059054537b38fc48
 app.get('/refresh_token', checkAuth, (req, res) => {
   const payload = {...req.jwt}

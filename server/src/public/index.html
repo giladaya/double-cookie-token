@@ -6,7 +6,7 @@
   </head>
   <body>
     <div id="root">
-      <form action="/login" method="GET">
+      <form id="login_ui" action="/login" method="POST">
         <label>
           email
           <input name="email"/>
@@ -18,7 +18,7 @@
         <button>Login</button>
       </form>
       <br/>
-      <div>
+      <div id="logout_ui">
         <button id="btn_logout">Logout</button>
       </div>
       <br/>
@@ -40,8 +40,12 @@
         }, {});
       console.log('Cookies', cookies);
       
+      // init
       const resEl = document.getElementById('result');
+      const loginUi = document.getElementById('login_ui');
+      const logoutUi = document.getElementById('logout_ui');
       const btnLogout = document.getElementById('btn_logout');
+
       btnLogout.addEventListener('click', ev => {
         ev.preventDefault();
         // remove cookie
@@ -50,6 +54,10 @@
       })
 
       if (cookies[COOKIE_NAME]) {
+        // User is logged in
+        loginUi.style.display = 'none'
+        logoutUi.style.display = '';
+
         fetch('/private', {
           headers: {
             'x-requested-with': cookies[COOKIE_NAME],
@@ -60,6 +68,9 @@
           resEl.innerText = text;
         })
       } else {
+        // User is logged out
+        loginUi.style.display = ''
+        logoutUi.style.display = 'none';
         resEl.innerText = 'Not logged-in';
       }
     </script>
